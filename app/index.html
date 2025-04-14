@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Zoho SDK & Scripts -->
+    <script src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+    <script src="widget.js"></script>
+    <script src="node_modules/toastify-js/src/toastify.js"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <title>Crear Factura</title>
+    <style>
+        /* Puedes ajustar estos valores según lo necesites */
+        .fixed-textarea {
+            height: 150px;
+            resize: none;
+        }
+    </style>
+</head>
+
+<body class="zoho-theme">
+    <div class="widget-container container my-4 p-4 border rounded shadow-sm">
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 id="headerTitle" class="h4 fw-semibold text-primary">Crear Cotización</h1>
+            <button id="closeWidgetBtn" class="btn btn-sm btn-close" aria-label="Cerrar">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+        <form id="invoiceForm" class="needs-validation" novalidate>
+            <!-- Información del Trato y Cliente -->
+            <div class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="Deal_Name" class="form-label">NOMBRE DEL TRATO</label>
+                        <input type="text" class="form-control" id="Deal_Name" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Customer_Name" class="form-label">NOMBRE DEL CLIENTE</label>
+                        <input type="text" class="form-control" id="Customer_Name" readonly>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label for="Deal_Owner" class="form-label text-muted small">RESPONSABLE</label>
+                    <input type="text" class="form-control form-control-sm bg-light" id="Deal_Owner" readonly>
+                </div>
+            </div>
+
+            <!-- Campos Ocultos -->
+            <input type="hidden" id="Customer_ID" required>
+            <input type="hidden" id="Reference_Number">
+
+            <!-- Fechas -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="Invoice_Date" class="form-label text-muted small">FECHA DE ESTIMACIÓN</label>
+                    <input type="date" class="form-control form-control-sm" id="Invoice_Date" required readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="Due_Date" class="form-label text-muted small">FECHA DE VENCIMIENTO</label>
+                    <input type="date" class="form-control form-control-sm" id="Due_Date" required>
+                </div>
+            </div>
+
+            <!-- Tabla de Productos -->
+            <div class="mb-4">
+                <h2 class="h5 fw-semibold text-muted mb-3">PRODUCTOS</h2>
+                <div class="table-responsive rounded-3 border">
+                    <table id="lineItemsTable" class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-muted small fw-normal">PRODUCTO</th>
+                                <th class="text-muted small fw-normal" style="width: 120px;">CANTIDAD</th>
+                                <th class="text-muted small fw-normal" style="width: 180px;">PRECIO UNITARIO</th>
+                                <th class="text-muted small fw-normal" style="width: 120px;">LISTA DE PRECIOS</th>
+                                <th class="text-muted small fw-normal text-end" style="width: 150px;">TOTAL</th>
+                                <th style="width: 40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <select class="form-select form-select-sm product-select" required>
+                                        <option value="">Seleccione un producto</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm quantity" min="1"
+                                        value="1">
+                                </td>
+                                <td>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-transparent">$</span>
+                                        <input type="number" class="form-control unit-price" step="0.01" min="0"
+                                            readonly>
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Contenedor para Lista de Precios -->
+                                    <div id="priceListContainer" class="mb-0" style="display: none;">
+                                        <select id="priceList" name="priceList" class="form-select form-select-sm">
+                                            <option value="">Seleccione una lista de precios</option>
+                                            <!-- Se llenará dinámicamente -->
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="text-end align-middle">
+                                    <span class="total-price">0.00</span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-product">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                              <td colspan="5">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center p-2 bg-white rounded shadow-sm">
+                                  <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2">Descuento:</span>
+                                    <input type="number" id="discountInput" class="form-control form-control-sm" style="max-width: 150px;" value="0.00" step="0.01">
+                                  </div>
+                                  <div class="d-flex align-items-center">
+                                    <span class="fw-bold me-2">Total General:</span>
+                                    <span id="grandTotal" class="form-control-plaintext text-end fw-bold" style="max-width: 150px;">0.00</span>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </tfoot>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end my-3">
+                    <button type="button" id="addProductBtn" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Agregar Producto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección de Detalles del Vehículo en un Recuadro (Card) -->
+            <div class="mb-4">
+                <h2 class="h5 fw-semibold text-muted mb-3">DETALLES DEL VEHÍCULO</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="marca" class="form-label">Marca</label>
+                                <input type="text" id="marca" name="marca" class="form-control form-control-sm"
+                                    placeholder="Ej: Toyota">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="anio" class="form-label">Año</label>
+                                <input type="text" id="anio" name="anio" class="form-control form-control-sm"
+                                    placeholder="Ej: 2022">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="tapiceria" class="form-label">Tapicería</label>
+                                <input type="text" id="tapiceria" name="tapiceria" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="color" class="form-label">Color</label>
+                                <input type="text" id="color" name="color" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <input type="text" id="tipo" name="tipo" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="modelo" class="form-label">Modelo</label>
+                                <input type="text" id="modelo" name="modelo" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="chasis" class="form-label">Chasis</label>
+                                <input type="text" id="chasis" name="chasis" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="motor" class="form-label">Motor</label>
+                                <input type="text" id="motor" name="motor" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="equipo_solicitado" class="form-label">EQUIPO SOLICITADO</label>
+                                <textarea id="equipo_solicitado" name="equipo_solicitado"
+                                    class="form-control form-control-sm fixed-textarea"
+                                    placeholder="Describa el equipo solicitado..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="codigo" class="form-label">CÓDIGO</label>
+                                <textarea id="codigo" name="codigo" class="form-control form-control-sm fixed-textarea"
+                                    placeholder="Ingrese el código del equipo..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Términos y Condiciones -->
+            <div class="mb-4">
+                <h2 class="h5 fw-semibold text-muted mb-3">TÉRMINOS Y CONDICIONES</h2>
+                <div class="card border">
+                    <div class="card-body p-3">
+                        <textarea id="TermsAndConditions" class="form-control form-control-sm auto-resize" rows="3"
+                            style="min-height: 100px; resize: none; overflow-y: hidden;"
+                            placeholder="Ingrese los términos y condiciones para esta cotización...">
+Esperamos seguir haciendo negocios con usted.
+            </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-save me-1"></i> Crear Cotización
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast de Bootstrap -->
+    <div class="position-fixed top-0 start-50 translate-middle-x p-3"
+        style="z-index: 11; width: 100%; max-width: 600px;">
+        <div id="bootstrapToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-1 fw-semibold">¡Cotización enviada con éxito!</h6>
+                        <p class="mb-0 small">La cotización ha sido creada correctamente.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Cancelar -->
+    <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 pb-4 pt-0 text-center">
+                    <i class="bi bi-exclamation-circle text-warning fs-1 mb-3"></i>
+                    <h5 id="titulofuera" class="modal-title mb-3">¿Está seguro que desea cancelar?</h5>
+                    <p class="text-muted">Los cambios no guardados se perderán.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No,
+                        continuar</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">Sí, cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
