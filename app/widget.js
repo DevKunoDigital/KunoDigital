@@ -632,30 +632,65 @@ async function createInvoice() {
   // Capturar los productos (Line Items) dinámicamente
   let hasValidProducts = false;
   let stockError = false;
+
   rows.forEach(row => {
     const productSelect = row.querySelector(".product-select");
     const quantityInput = row.querySelector(".quantity");
     const unitPriceInput = row.querySelector(".unit-price");
-
+  
     if (productSelect && productSelect.value && quantityInput && unitPriceInput) {
       const selectedProductId = productSelect.value;
-      // Buscar el producto utilizando la propiedad item_id
       const selectedProduct = productsList.find(product => product.item_id === selectedProductId);
-
+  
+      // Limpiar clases previas
+      quantityInput.classList.remove("error", "is-valid");
+  
       if (selectedProduct) {
-        hasValidProducts = true;
-        const product = {
-          // Asignamos el id usando la propiedad item_id
-          item_id_crm: selectedProduct.item_id,
-          // Usamos item_name o name (según prefieras)
-          name: selectedProduct.item_name || selectedProduct.name,
-          rate: parseFloat(unitPriceInput.value) || 0,
-          quantity: parseFloat(quantityInput.value) || 1
-        };
-        invoiceData.line_items.push(product);
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const stock = parseFloat(selectedProduct.actual_available_stock) ?? 0;
+  
+        // Asignar evento input solo una vez
+        if (!quantityInput._hasStockListener) {
+          const validateInRealTime = function () {
+            const currentQuantity = parseFloat(this.value) || 0;
+            if (currentQuantity > stock) {
+              this.classList.add("error");
+              this.classList.remove("is-valid");
+            } else {
+              this.classList.remove("error");
+              this.classList.add("is-valid");
+            }
+          };
+          quantityInput.addEventListener('input', validateInRealTime);
+          quantityInput._hasStockListener = true; // evitar múltiples listeners
+        }
+  
+        // Validación al enviar
+        if (quantity > stock) {
+          stockError = true;
+          quantityInput.classList.add("error");
+          quantityInput.classList.remove("is-valid");
+        } else {
+          hasValidProducts = true;
+  
+          const product = {
+            item_id_crm: selectedProduct.item_id,
+            name: selectedProduct.item_name || selectedProduct.name,
+            rate: parseFloat(unitPriceInput.value) || 0,
+            quantity: quantity
+          };
+  
+          invoiceData.line_items.push(product);
+        }
       }
     }
   });
+
+
+  if (stockError) {
+    showErrorToast("La cantidad ingresada supera el stock disponible. Corriga el Campo cantidad");
+    return;
+  }
 
   if (!hasValidProducts) {
     showErrorToast("Debe seleccionar al menos un producto válido");

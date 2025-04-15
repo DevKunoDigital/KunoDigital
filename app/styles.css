@@ -11,7 +11,15 @@
 }
 
 
-
+.error {
+    border: 2px solid red;
+  }
+  input.error {
+    border: 2px solid red !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25) !important;
+    background-image: none !important; /* Quita ícono verde de Bootstrap */
+  }
+  
 /* Estilos generales */
 body.zoho-theme {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -325,6 +333,7 @@ button, input, select, textarea {
         transform: translate3d(0, 0, 0);
     }
 }
+
 
 @keyframes fadeIn {
     from { opacity: 0; }
