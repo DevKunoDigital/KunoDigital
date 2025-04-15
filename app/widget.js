@@ -16,12 +16,12 @@ function initializeBootstrapFeatures() {
   // Configurar modal de confirmación para cancelar
   const confirmCancelBtn = document.getElementById('confirmCancelBtn');
   if (confirmCancelBtn) {
-    confirmCancelBtn.addEventListener('click', function() {
+    confirmCancelBtn.addEventListener('click', function () {
       ZOHO.CRM.UI.Popup.close()
-        .then(function(data) {
+        .then(function (data) {
           console.log("Widget cerrado:", data);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error("Error al cerrar el widget:", error);
         });
     });
@@ -30,7 +30,7 @@ function initializeBootstrapFeatures() {
   // Configurar validación de formulario
   const form = document.getElementById('invoiceForm');
   if (form) {
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', function (event) {
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
@@ -68,15 +68,15 @@ function showSuccessToast(message = "Operación completada exitosamente") {
   const icon = toastEl.querySelector('i');
   const title = toastEl.querySelector('h6');
   const msg = toastEl.querySelector('p');
-  
+
   // Configurar para éxito
   icon.className = "bi bi-check-circle-fill me-3 fs-4";
   toastEl.className = "toast align-items-center text-white bg-success border-0";
-  
+
   // Actualizar contenido
   title.textContent = "¡Éxito!";
   msg.textContent = message;
-  
+
   // Mostrar notificación
   const toast = new bootstrap.Toast(toastEl, {
     animation: true,
@@ -91,13 +91,13 @@ function calculateRowTotal(row) {
   const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
   const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
   const total = quantity * unitPrice;
-  
+
   // Mostrar el total en la fila (necesitarás agregar una celda para esto)
   const totalCell = row.querySelector('.total-price');
   if (totalCell) {
     totalCell.textContent = total.toFixed(2);
   }
-  
+
   return total;
 }
 
@@ -117,13 +117,13 @@ function calculateRowTotal(row) {
   const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
   const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
   const total = quantity * unitPrice;
-  
+
   // Mostrar el total en la fila
   const totalCell = row.querySelector('.total-price');
   if (totalCell) {
     totalCell.textContent = total.toFixed(2);
   }
-  
+
   return total;
 }
 
@@ -144,13 +144,13 @@ function calculateRowTotal(row) {
   const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
   const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
   const total = quantity * unitPrice;
-  
+
   // Mostrar el total en la fila
   const totalCell = row.querySelector('.total-price');
   if (totalCell) {
     totalCell.textContent = total.toFixed(2);
   }
-  
+
   return total;
 }
 
@@ -161,12 +161,12 @@ function updateBasePrice(row) {
   if (productSelect && productSelect.value) {
     const selectedOption = productSelect.options[productSelect.selectedIndex];
     const basePrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-    
+
     // Actualizar precio base y resetear cantidad a 1
     row.setAttribute('data-base-price', basePrice);
     row.querySelector('.unit-price').value = basePrice;
     row.querySelector('.quantity').value = 1;
-    
+
     // Calcular y actualizar totales
     calculateRowTotal(row);
     updateGrandTotal();
@@ -177,15 +177,15 @@ function updateBasePrice(row) {
 function setupRowEvents(row) {
   // Configurar eventos para el select de producto
   const productSelect = row.querySelector('.product-select');
-  productSelect.addEventListener('change', function() {
+  productSelect.addEventListener('change', function () {
     updateBasePrice(row);
   });
 
   // Configurar eventos para cambios en cantidad y precio
   const quantityInput = row.querySelector('.quantity');
   const unitPriceInput = row.querySelector('.unit-price');
-  
-  const handleInputChange = function() {
+
+  const handleInputChange = function () {
     calculateRowTotal(row);
     updateGrandTotal();
   };
@@ -196,10 +196,10 @@ function setupRowEvents(row) {
 
   // Configurar evento para eliminar fila
   const removeBtn = row.querySelector('.remove-product');
-  removeBtn.addEventListener('click', function() {
+  removeBtn.addEventListener('click', function () {
     row.remove();
     updateGrandTotal();
-    
+
     // Si no quedan filas, agregar una nueva
     if (document.querySelectorAll("#lineItemsTable tbody tr").length === 0) {
       addProductRow();
@@ -212,25 +212,25 @@ function updateGrandTotal() {
   // Sumar el total de todas las filas
   const rows = document.querySelectorAll("#lineItemsTable tbody tr");
   let total = 0;
-  
+
   rows.forEach(row => {
     // calculateRowTotal ya actualiza la celda de total por fila y devuelve el total
     total += calculateRowTotal(row);
   });
-  
+
   // Obtener el descuento ingresado (si es que se ingresó)
   const discountInput = document.getElementById('discountInput');
   const discount = parseFloat(discountInput.value) || 0;
-  
+
   // Calcular el total final restando el descuento
   const finalTotal = total - discount;
-  
+
   // Opcional: actualizar un campo para mostrar el descuento aplicado
   const discountPriceElement = document.getElementById('descuentoprice');
   if (discountPriceElement) {
     discountPriceElement.textContent = discount.toFixed(2);
   }
-  
+
   // Actualizar el total general en pantalla
   const grandTotalElement = document.getElementById('grandTotal');
   if (grandTotalElement) {
@@ -243,16 +243,16 @@ function updateGrandTotal() {
 function addProductRow() {
   const tbody = document.querySelector("#lineItemsTable tbody");
   const newRow = document.createElement("tr");
-  
+
   newRow.innerHTML = `
     <td>
       <select class="form-select form-select-sm product-select" required>
         <option value="">Seleccione un producto</option>
-        ${productsList.map(product => 
-          `<option value="${product.id}" data-price="${product.Unit_Price || 0}">
+        ${productsList.map(product =>
+    `<option value="${product.id}" data-price="${product.Unit_Price || 0}">
             ${product.Product_Name}
           </option>`
-        ).join('')}
+  ).join('')}
       </select>
     </td>
     <td>
@@ -273,7 +273,7 @@ function addProductRow() {
       </button>
     </td>
   `;
-  
+
   tbody.appendChild(newRow);
   setupRowEvents(newRow);
   updateGrandTotal();
@@ -288,15 +288,15 @@ function showErrorToast(message = "Ocurrió un error") {
   const icon = toastEl.querySelector('i');
   const title = toastEl.querySelector('h6');
   const msg = toastEl.querySelector('p');
-  
+
   // Configurar para error
   icon.className = "bi bi-exclamation-triangle-fill me-3 fs-4";
   toastEl.className = "toast align-items-center text-white bg-danger border-0";
-  
+
   // Actualizar contenido
   title.textContent = "¡Error!";
   msg.textContent = message;
-  
+
   // Mostrar notificación
   const toast = new bootstrap.Toast(toastEl, {
     animation: true,
@@ -327,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const today = new Date();
     const dueDate = new Date();
     dueDate.setDate(today.getDate() + 8);
-    
+
     // Formatear fechas como YYYY-MM-DD (formato input date)
     document.getElementById("Invoice_Date").value = today.toISOString().split('T')[0];
     document.getElementById("Due_Date").value = dueDate.toISOString().split('T')[0];
@@ -357,8 +357,8 @@ document.addEventListener("DOMContentLoaded", function () {
           document.getElementById("Customer_Name").value = contactName;
           document.getElementById("headerTitle").textContent = "Crear Cotización - " + contactName;
           document.getElementById("Deal_Name").value = dealData.Deal_Name || '';
-          if(dealData.Owner && dealData.Owner.name) {
-              document.getElementById("Deal_Owner").value = dealData.Owner.name;
+          if (dealData.Owner && dealData.Owner.name) {
+            document.getElementById("Deal_Owner").value = dealData.Owner.name;
           }
         }
       }).catch(function (error) {
@@ -385,7 +385,7 @@ async function initializeWidget() {
   console.log("Inicializando widget...");
 
   // Configurar botón de cerrar
-  document.getElementById("closeWidgetBtn").addEventListener("click", function() {
+  document.getElementById("closeWidgetBtn").addEventListener("click", function () {
     const modal = new bootstrap.Modal(document.getElementById('confirmCancelModal'));
     modal.show();
   });
@@ -395,7 +395,7 @@ async function initializeWidget() {
 
   const initialRow = document.querySelector("#lineItemsTable tbody tr");
   if (initialRow) {
-      setupRowEvents(initialRow);
+    setupRowEvents(initialRow);
   }
 
   document.getElementById("addProductBtn").addEventListener("click", addProductRow);
@@ -414,12 +414,12 @@ async function getPriceListsFromAPI() {
       throw new Error("Error en la solicitud de lista de precios: " + response.statusText);
     }
     const responseJSON = await response.json();
-    priceLists = responseJSON.pricebooks; 
+    priceLists = responseJSON.pricebooks;
     // Llenar el select de lista de precios
     const priceListSelect = document.getElementById("priceList");
     priceListSelect.innerHTML = `<option value="">Seleccione una lista de precios</option>`;
     priceLists.forEach(priceObj => {
-      
+
       const option = document.createElement("option");
       option.value = priceObj.pricebooks_id;
       option.textContent = priceObj.name;
@@ -432,23 +432,45 @@ async function getPriceListsFromAPI() {
 }
 
 
-// Función para poblar los campos de vehículo basándose en el producto seleccionado
-function populateVehiculoDetails(product) {
-  document.getElementById('marca').value = product.brand || '';
-  document.getElementById('anio').value = product.cf_a_o || '';
-  document.getElementById('modelo').value = product.cf_modelo || '';
-  document.getElementById('tapiceria').value = '';
-  document.getElementById('color').value = product.attribute_option_name1 || '';
-  document.getElementById('tipo').value = product.cf_categor_a_del_producto || '';
-  document.getElementById('chasis').value = '';
-  document.getElementById('motor').value = '';
-  document.getElementById('equipo_solicitado').value = '';
-  document.getElementById('codigo').value = '';
+
+
+
+
+function populateVehiculoDetailsFromFinance(vehiculoData) {
+  const customFields = vehiculoData.custom_field_hash || {};
+
+  document.getElementById('marca').value = vehiculoData.brand || '';
+  document.getElementById('anio').value = customFields.cf_a_o || '';
+  document.getElementById('modelo').value = customFields.cf_modelo || '';
+  document.getElementById('tapiceria').value = customFields.cf_tapiceria || '';
+  document.getElementById('color').value = vehiculoData.attribute_option_name1 || '';
+  document.getElementById('tipo').value = customFields.cf_categor_a_del_producto || '';
+  document.getElementById('motor').value = ''; // Si luego lo tienes en un campo, se puede completar aquí
+  document.getElementById('equipo_solicitado').value = ''; // Igual que arriba
+  document.getElementById('codigo').value = ''; // Igual
+
+  const chasisSelect = document.getElementById('chasis');
+  chasisSelect.innerHTML = '<option value="">Selecciona un chasis</option>';
+
+  document.getElementById('chasis').addEventListener('change', function () {
+    console.log("🔧 Chasis seleccionado por el usuario:", this.value);
+
+
+
+  });
+
+  if (Array.isArray(vehiculoData.serial_numbers)) {
+    vehiculoData.serial_numbers.forEach(serial => {
+      const option = document.createElement('option');
+      option.value = serial;
+      option.textContent = serial;
+      chasisSelect.appendChild(option);
+    });
+  }
 }
 
 
 
-// En la función getProductsFromCRM, cuando cargas la lista de productos:
 async function getProductsFromCRM() {
   console.log("Obteniendo lista de productos desde Zoho CRM...");
 
@@ -469,39 +491,63 @@ async function getProductsFromCRM() {
       productSelect.innerHTML = "<option value=''>Seleccione un producto</option>";
 
       productsList.forEach(product => {
-        // Agregar productos al selector de productos
         const productOption = document.createElement("option");
-        productOption.value = product.item_id; // Asegúrate de que coincida con el campo del JSON
+        productOption.value = product.item_id;
+        productOption.value = product.item_id;
         productOption.textContent = product.item_name;
         productOption.setAttribute('data-price', product.rate || 0);
+        productOption.setAttribute('data-stock', product.actual_available_stock || 0);
         productSelect.appendChild(productOption);
       });
 
-      console.log("Lista de productos cargada correctamente.");
 
-      // Evento para actualizar precio y detalles del vehículo al seleccionar producto
+
+
       productSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         const selectedProductId = this.value;
+        const stock = selectedOption.getAttribute('data-stock');
         const price = selectedOption.getAttribute('data-price');
         const row = this.closest('tr');
         row.querySelector('.unit-price').value = price;
 
-        // Buscar el producto en productsList
-        const product = productsList.find(prod => prod.item_id === selectedProductId);
-        if (product) {
-          populateVehiculoDetails(product);
+        console.log("item id del producto seleccionado: ", selectedProductId);
+        console.log("Stock disponible:", stock);
 
-          document.getElementById('priceListContainer').style.display = 'block';
 
-          if (priceLists.length === 0) {
-            getPriceListsFromAPI();
-          }
-        } else {
-          // Si no hay producto seleccionado, ocultar la lista de precios
-          document.getElementById('priceListContainer').style.display = 'none';
+
+        // Mostrar contenedor de listas de precios
+        document.getElementById('priceListContainer').style.display = 'block';
+
+        // Obtener listas de precios si aún no se han cargado
+        if (priceLists.length === 0) {
+          getPriceListsFromAPI();
         }
-          
+
+        // Obtener detalles del producto desde Zoho Finance (función específica)
+        ZOHO.CRM.FUNCTIONS.execute("itemsinventory", {
+          arguments: JSON.stringify({
+            item_id: selectedProductId
+          })
+        })
+          .then(function (data) {
+            console.log("Resultado de la función itemsinventory:", data);
+
+            if (data.code === "success" && data.details && data.details.output) {
+              const parsedOutput = JSON.parse(data.details.output);
+
+              if (parsedOutput.item) {
+                populateVehiculoDetailsFromFinance(parsedOutput.item);
+              } else {
+                console.warn("No se encontró el objeto 'item' en la respuesta.");
+              }
+            } else {
+              console.error("La función no se ejecutó correctamente o falta información en la respuesta.");
+            }
+          })
+          .catch(function (error) {
+            console.error("Error al ejecutar la función de Zoho Finance:", error);
+          });
       });
     }
   } catch (error) {
@@ -509,6 +555,8 @@ async function getProductsFromCRM() {
     showToast("Error al cargar la lista de productos", false);
   }
 }
+
+
 
 
 // Función para enviar datos al webhook de Make 
@@ -532,6 +580,8 @@ async function sendToWebhook(data) {
     throw error;
   }
 }
+
+
 
 // Función para crear la Estimacion
 async function createInvoice() {
@@ -581,16 +631,17 @@ async function createInvoice() {
 
   // Capturar los productos (Line Items) dinámicamente
   let hasValidProducts = false;
+  let stockError = false;
   rows.forEach(row => {
     const productSelect = row.querySelector(".product-select");
     const quantityInput = row.querySelector(".quantity");
     const unitPriceInput = row.querySelector(".unit-price");
-  
+
     if (productSelect && productSelect.value && quantityInput && unitPriceInput) {
       const selectedProductId = productSelect.value;
       // Buscar el producto utilizando la propiedad item_id
       const selectedProduct = productsList.find(product => product.item_id === selectedProductId);
-      
+
       if (selectedProduct) {
         hasValidProducts = true;
         const product = {
@@ -618,7 +669,7 @@ async function createInvoice() {
     const webhookResponse = await sendToWebhook(invoiceData);
     console.log("Respuesta del webhook:", webhookResponse);
     showSuccessToast("¡Cotización creada exitosamente!");
-    
+    //
     try {
       await ZOHO.CRM.BLUEPRINT.proceed();
       console.log("Transición de blueprint ejecutada correctamente");
@@ -626,12 +677,13 @@ async function createInvoice() {
       console.warn("No se pudo avanzar en el blueprint:", bpError);
       showToast("Cotización creada pero hubo un problema con el proceso interno", false);
     }
-    
+    //
+
     // Cerrar el widget después de 2 segundos
     setTimeout(() => {
       ZOHO.CRM.UI.Popup.close();
     }, 3000);
-    
+
   } catch (error) {
     console.error("Error al enviar datos al webhook:", error);
     showErrorToast("Error al crear la cotización: " + (error.message || "Por favor intente nuevamente"));
