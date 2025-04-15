@@ -9,7 +9,10 @@
     --zoho-warning: #ffc107;
     --zoho-info: #17a2b8;
 }
-
+.stock-display {
+    font-weight: bold;
+    color: #6c757d; /* gris Bootstrap */
+  }
 
 .error {
     border: 2px solid red;

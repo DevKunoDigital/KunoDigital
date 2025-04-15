@@ -407,34 +407,30 @@ async function initializeWidget() {
   });
 }
 
-async function getPriceListsFromAPI() {
-  try {
-    const response = await fetch("https://project-rainfall-883996440.catalystserverless.com/server/kuno-api/listprice");
-    if (!response.ok) {
-      throw new Error("Error en la solicitud de lista de precios: " + response.statusText);
-    }
-    const responseJSON = await response.json();
-    priceLists = responseJSON.pricebooks;
-    // Llenar el select de lista de precios
-    const priceListSelect = document.getElementById("priceList");
-    priceListSelect.innerHTML = `<option value="">Seleccione una lista de precios</option>`;
-    priceLists.forEach(priceObj => {
 
-      const option = document.createElement("option");
-      option.value = priceObj.pricebooks_id;
-      option.textContent = priceObj.name;
-      priceListSelect.appendChild(option);
-    });
-  } catch (error) {
-    console.error("Error al obtener lista de precios:", error);
-    showToast("Error al cargar la lista de precios", false);
-  }
-}
+// async function getPriceListsFromAPI() {
+//   try {
+//     const response = await fetch("https://project-rainfall-883996440.catalystserverless.com/server/kuno-api/listprice");
+//     if (!response.ok) {
+//       throw new Error("Error en la solicitud de lista de precios: " + response.statusText);
+//     }
+//     const responseJSON = await response.json();
+//     priceLists = responseJSON.pricebooks;
+//     // Llenar el select de lista de precios
+//     const priceListSelect = document.getElementById("priceList");
+//     priceListSelect.innerHTML = `<option value="">Seleccione una lista de precios</option>`;
+//     priceLists.forEach(priceObj => {
 
-
-
-
-
+//       const option = document.createElement("option");
+//       option.value = priceObj.pricebooks_id;
+//       option.textContent = priceObj.name;
+//       priceListSelect.appendChild(option);
+//     });
+//   } catch (error) {
+//     console.error("Error al obtener lista de precios:", error);
+//     showToast("Error al cargar la lista de precios", false);
+//   }
+// }
 
 function populateVehiculoDetailsFromFinance(vehiculoData) {
   const customFields = vehiculoData.custom_field_hash || {};
@@ -493,11 +489,22 @@ async function getProductsFromCRM() {
       productsList.forEach(product => {
         const productOption = document.createElement("option");
         productOption.value = product.item_id;
-        productOption.value = product.item_id;
         productOption.textContent = product.item_name;
         productOption.setAttribute('data-price', product.rate || 0);
         productOption.setAttribute('data-stock', product.actual_available_stock || 0);
         productSelect.appendChild(productOption);
+      });
+
+      document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("product-select")) {
+          const selectedOption = e.target.options[e.target.selectedIndex];
+          const stock = selectedOption.getAttribute("data-stock") || "0";
+      
+          const row = e.target.closest("tr");
+          const stockSpan = row.querySelector(".stock-display");
+      
+          stockSpan.textContent = stock;
+        }
       });
 
 
@@ -516,13 +523,7 @@ async function getProductsFromCRM() {
 
 
 
-        // Mostrar contenedor de listas de precios
-        document.getElementById('priceListContainer').style.display = 'block';
 
-        // Obtener listas de precios si aún no se han cargado
-        if (priceLists.length === 0) {
-          getPriceListsFromAPI();
-        }
 
         // Obtener detalles del producto desde Zoho Finance (función específica)
         ZOHO.CRM.FUNCTIONS.execute("itemsinventory", {
@@ -617,8 +618,7 @@ async function createInvoice() {
       motor: document.getElementById('motor').value,
       equipo_solicitado: document.getElementById('equipo_solicitado').value,
       codigo: document.getElementById('codigo').value,
-      // Agregar el valor de la lista de precios, si se ha seleccionado
-      price_list: document.getElementById('priceList').value
+
     }
   };
 
@@ -637,18 +637,18 @@ async function createInvoice() {
     const productSelect = row.querySelector(".product-select");
     const quantityInput = row.querySelector(".quantity");
     const unitPriceInput = row.querySelector(".unit-price");
-  
+
     if (productSelect && productSelect.value && quantityInput && unitPriceInput) {
       const selectedProductId = productSelect.value;
       const selectedProduct = productsList.find(product => product.item_id === selectedProductId);
-  
+
       // Limpiar clases previas
       quantityInput.classList.remove("error", "is-valid");
-  
+
       if (selectedProduct) {
         const quantity = parseFloat(quantityInput.value) || 0;
         const stock = parseFloat(selectedProduct.actual_available_stock) ?? 0;
-  
+
         // Asignar evento input solo una vez
         if (!quantityInput._hasStockListener) {
           const validateInRealTime = function () {
@@ -664,7 +664,7 @@ async function createInvoice() {
           quantityInput.addEventListener('input', validateInRealTime);
           quantityInput._hasStockListener = true; // evitar múltiples listeners
         }
-  
+
         // Validación al enviar
         if (quantity > stock) {
           stockError = true;
@@ -672,14 +672,14 @@ async function createInvoice() {
           quantityInput.classList.remove("is-valid");
         } else {
           hasValidProducts = true;
-  
+
           const product = {
             item_id_crm: selectedProduct.item_id,
             name: selectedProduct.item_name || selectedProduct.name,
             rate: parseFloat(unitPriceInput.value) || 0,
             quantity: quantity
           };
-  
+
           invoiceData.line_items.push(product);
         }
       }

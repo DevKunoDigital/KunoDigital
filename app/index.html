@@ -78,9 +78,9 @@
                             <tr>
                                 <th class="text-muted small fw-normal">PRODUCTO</th>
                                 <th class="text-muted small fw-normal" style="width: 120px;">CANTIDAD</th>
+                                <th class="text-muted small fw-normal" style="width: 80px;">STOCK</th>
                                 <th class="text-muted small fw-normal" style="width: 180px;">PRECIO UNITARIO</th>
-                                <th class="text-muted small fw-normal" style="width: 120px;">LISTA DE PRECIOS</th>
-                                <th class="text-muted small fw-normal text-end" style="width: 150px;">TOTAL</th>
+                                <th class="text-muted small fw-normal text-end" style="width: 150px;">SUB TOTAL</th>
                                 <th style="width: 40px;"></th>
                             </tr>
                         </thead>
@@ -96,21 +96,17 @@
                                         value="1">
                                 </td>
                                 <td>
+                                    <span class="stock-display">-</span>
+                                </td>
+                                
+                                <td>
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-transparent">$</span>
                                         <input type="number" class="form-control unit-price" step="0.01" min="0"
                                             readonly>
                                     </div>
                                 </td>
-                                <td>
-                                    <!-- Contenedor para Lista de Precios -->
-                                    <div id="priceListContainer" class="mb-0" style="display: none;">
-                                        <select id="priceList" name="priceList" class="form-select form-select-sm">
-                                            <option value="">Seleccione una lista de precios</option>
-                                            <!-- Se llenará dinámicamente -->
-                                        </select>
-                                    </div>
-                                </td>
+                             
                                 <td class="text-end align-middle">
                                     <span class="total-price">0.00</span>
                                 </td>
@@ -129,6 +125,7 @@
                                     <span class="fw-bold me-2">Descuento:</span>
                                     <input type="number" id="discountInput" class="form-control form-control-sm" style="max-width: 150px;" value="0.00" step="0.01">
                                   </div>
+                                
                                   <div class="d-flex align-items-center">
                                     <span class="fw-bold me-2">Total General:</span>
                                     <span id="grandTotal" class="form-control-plaintext text-end fw-bold" style="max-width: 150px;">0.00</span>
