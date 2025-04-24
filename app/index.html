@@ -30,9 +30,9 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 id="headerTitle" class="h4 fw-semibold text-primary">Crear Cotización</h1>
             <button id="closeWidgetBtn" class="btn btn-sm btn-close" aria-label="Cerrar">
-              <i class="bi bi-x-lg"></i>
+                <i class="bi bi-x-lg"></i>
             </button>
-          </div>
+        </div>
 
         <form id="invoiceForm" class="needs-validation" novalidate>
             <!-- Información del Trato y Cliente -->
@@ -41,6 +41,14 @@
                     <div class="col-md-6">
                         <label for="Deal_Name" class="form-label">NOMBRE DEL TRATO</label>
                         <input type="text" class="form-control" id="Deal_Name" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Deal_Name" class="form-label">RUC/</label>
+                        <input type="text" class="form-control" id="contac_ruc" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Deal_Name" class="form-label">TELEFONO</label>
+                        <input type="text" class="form-control" id="contac_tel" readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="Customer_Name" class="form-label">NOMBRE DEL CLIENTE</label>
@@ -82,8 +90,10 @@
                                 <th class="text-muted small fw-normal" style="width: 180px;">PRECIO UNITARIO</th>
                                 <th class="text-muted small fw-normal text-end" style="width: 150px;">SUB TOTAL</th>
                                 <th style="width: 40px;"></th>
+                                
                             </tr>
                         </thead>
+                        
                         <tbody>
                             <tr>
                                 <td>
@@ -98,7 +108,7 @@
                                 <td>
                                     <span class="stock-display">-</span>
                                 </td>
-                                
+
                                 <td>
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-transparent">$</span>
@@ -106,7 +116,7 @@
                                             readonly>
                                     </div>
                                 </td>
-                             
+
                                 <td class="text-end align-middle">
                                     <span class="total-price">0.00</span>
                                 </td>
@@ -119,28 +129,51 @@
                         </tbody>
                         <tfoot>
                             <tr class="table-light">
-                              <td colspan="5">
-                                <div class="d-flex flex-wrap justify-content-between align-items-center p-2 bg-white rounded shadow-sm">
-                                  <div class="d-flex align-items-center">
-                                    <span class="fw-bold me-2">Descuento:</span>
-                                    <input type="number" id="discountInput" class="form-control form-control-sm" style="max-width: 150px;" value="0.00" step="0.01">
-                                  </div>
-                                
-                                  <div class="d-flex align-items-center">
-                                    <span class="fw-bold me-2">Total General:</span>
-                                    <span id="grandTotal" class="form-control-plaintext text-end fw-bold" style="max-width: 150px;">0.00</span>
-                                  </div>
-                                </div>
-                              </td>
+                                <td colspan="5">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 bg-white rounded shadow-sm">
+                                        <div class="d-flex align-items-center">
+                                            <span class="fw-bold me-2">En Tránsito:</span>
+                                            <span id="entransito" class="ms-1">-</span>
+                                          </div>
+                                          
+                                        <div class="d-flex align-items-center" style="display: none;">
+                                            <span class="fw-bold me-2">Descuento:</span>
+                                            <input type="number" id="discountInput" class="form-control form-control-sm"
+                                                style="max-width: 150px;" value="0.00" step="0.01">
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center">
+                                            <span class="fw-bold me-2">Impuesto:</span>
+                                            <input type="number" id="taxInput" class="form-control form-control-sm"
+                                                style="max-width: 150px;" value="7.00" step="0.01">
+                                            <span class="ms-1">%</span>
+
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <span class="fw-bold me-2">Total General:</span>
+                                            <span id="grandTotalFooter" class="form-control-plaintext text-end fw-bold"
+                                                style="max-width: 150px;">0.00</span>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
-                          </tfoot>
+                        </tfoot>
+
                     </table>
+                    <div class="mt-3 text-end pe-3">
+                        <p><strong>Subtotal:</strong> <span id="subtotal">$0.00</span></p>
+                        <p><strong>Impuesto (<span id="taxLabel">7%</span>):</strong> <span id="taxAmount">$0.00</span>
+                        </p>
+                        <p><strong>Total:</strong> <span id="grandTotal">$0.00</span></p>
+                    </div>
+
                 </div>
-                <div class="d-flex justify-content-end my-3">
+                <!-- <div class="d-flex justify-content-end my-3">
                     <button type="button" id="addProductBtn" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-plus-circle me-1"></i> Agregar Producto
                     </button>
-                </div>
+                </div> -->
             </div>
 
             <!-- Sección de Detalles del Vehículo en un Recuadro (Card) -->
@@ -152,54 +185,71 @@
                             <div class="col-md-3">
                                 <label for="marca" class="form-label">Marca</label>
                                 <input type="text" id="marca" name="marca" class="form-control form-control-sm"
-                                    placeholder="Ej: Toyota">
+                                     required>
                             </div>
                             <div class="col-md-3">
                                 <label for="anio" class="form-label">Año</label>
                                 <input type="text" id="anio" name="anio" class="form-control form-control-sm"
-                                    placeholder="Ej: 2022">
+                                     required>
                             </div>
                             <div class="col-md-3">
                                 <label for="tapiceria" class="form-label">Tapicería</label>
-                                <input type="text" id="tapiceria" name="tapiceria" class="form-control form-control-sm">
+                                <input type="text" id="tapiceria" name="tapiceria" class="form-control form-control-sm" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="color" class="form-label">Color</label>
-                                <input type="text" id="color" name="color" class="form-control form-control-sm">
+                                <input type="text" id="color" name="color" class="form-control form-control-sm" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="tipo" class="form-label">Tipo</label>
-                                <input type="text" id="tipo" name="tipo" class="form-control form-control-sm">
+                                <input type="text" id="tipo" name="tipo" class="form-control form-control-sm" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="modelo" class="form-label">Modelo</label>
-                                <input type="text" id="modelo" name="modelo" class="form-control form-control-sm">
+                                <input type="text" id="modelo" name="modelo" class="form-control form-control-sm" required>
                             </div>
                             <div class="col-md-3">
                                 <label for="chasis" class="form-label">Chasis</label>
                                 <select id="chasis" name="chasis" class="form-select form-select-sm">
-                                  <option value="">Selecciona un chasis</option>
+                                  <option value="" disabled selected>Selecciona un chasis</option>
                                 </select>
                               </div>
                               
                             <div class="col-md-3">
                                 <label for="motor" class="form-label">Motor</label>
-                                <input type="text" id="motor" name="motor" class="form-control form-control-sm">
+                                <input type="text" id="motor" name="motor" class="form-control form-control-sm" required>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label for="equipo_solicitado" class="form-label">EQUIPO SOLICITADO</label>
-                                <textarea id="equipo_solicitado" name="equipo_solicitado"
-                                    class="form-control form-control-sm fixed-textarea"
-                                    placeholder="Describa el equipo solicitado..."></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="codigo" class="form-label">CÓDIGO</label>
-                                <textarea id="codigo" name="codigo" class="form-control form-control-sm fixed-textarea"
-                                    placeholder="Ingrese el código del equipo..."></textarea>
-                            </div>
-                        </div>
+                        <table class="table table-bordered mt-3 text-center align-middle">
+                            <thead>
+                                <tr>
+                                    <th>EQUIPO SOLICITADO</th>
+                                    <th>CÓDIGO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <textarea 
+                                            name="equipo_solicitado[]" 
+                                            class="form-control p-2" 
+                                            rows="3" 
+                                            style="resize: vertical;" 
+                                            required
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <textarea 
+                                            name="codigo[]" 
+                                            class="form-control p-2" 
+                                            rows="3" 
+                                            style="resize: vertical;" 
+                                            required
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
