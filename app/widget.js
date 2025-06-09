@@ -168,15 +168,23 @@ function updateGrandTotal() {
   const taxInput = document.getElementById('taxInput');
 
   const discount = parseFloat(discountInput?.value) || 0;
-  const taxRate = parseFloat(taxInput?.value) || 0;
-
-  // Calcular impuesto sobre el subtotal
+  let taxRate = 0;
+  if (taxInput) {
+    let taxText = taxInput.textContent.trim(); // Ej: "7%"
+    taxText = taxText.replace('%', ''); // Quitamos el símbolo %
+    taxRate = parseFloat(taxText) || 0;
+  }
 
 
   // Calcular total final (subtotal - descuento + impuesto)
   const totalAfterDiscount = subtotal - discount;
   const taxAmount = (totalAfterDiscount * taxRate) / 100;
   const grandTotal = totalAfterDiscount + taxAmount;
+
+  const totalAfterDiscountElement = document.getElementById('totalAfterDiscount');
+  if (totalAfterDiscountElement) {
+    totalAfterDiscountElement.textContent = `$${totalAfterDiscount.toFixed(2)}`;
+  }
 
 
   if (discount > subtotal) {
@@ -192,6 +200,9 @@ function updateGrandTotal() {
     subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
   }
 
+
+
+
   const taxAmountElement = document.getElementById('taxAmount');
   if (taxAmountElement) {
     taxAmountElement.textContent = `$${taxAmount.toFixed(2)}`;
@@ -201,15 +212,17 @@ function updateGrandTotal() {
   if (grandTotalElement) {
     grandTotalElement.textContent = `$${grandTotal.toFixed(2)}`;
   }
-  const grandTotalFooter = document.getElementById('grandTotalFooter');
-  if (grandTotalFooter) {
-    grandTotalFooter.textContent = `$${grandTotal.toFixed(2)}`;
-  }
+
 
   const discountPriceElement = document.getElementById('descuentoprice');
   if (discountPriceElement) {
     discountPriceElement.textContent = `$${discount.toFixed(2)}`;
   }
+  const discountDisplay = document.getElementById('discountDisplay');
+  if (discountDisplay) {
+    discountDisplay.textContent = `$${discount.toFixed(2)}`;
+  }
+
 }
 
 
@@ -314,12 +327,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("Due_Date").value = dueDate.toISOString().split('T')[0];
 
     ZOHO.CRM.UI.Resize({
-      height: "820",
-      width: "900"
+      height: "1300",
+      width: "1000"
     });
 
     if (data && data.Entity === "Deals") {
-      // Obtener el registro completo del Deal
       ZOHO.CRM.API.getRecord({
         Entity: "Deals",
         RecordID: data.EntityId,
@@ -328,35 +340,53 @@ document.addEventListener("DOMContentLoaded", function () {
         const dealData = response.data[0];
         console.log("Datos completos del Deal:", dealData);
 
-        // Capturar el ID del contacto si existe
         if (dealData.Contact_Name && dealData.Contact_Name.id) {
           const contactName = dealData.Contact_Name.name;
           const contactId = dealData.Contact_Name.id;
+
           console.log("ID del Contacto encontrado:", contactId);
           console.log("Nombre del Contacto:", contactName);
+
+          // Mostrar en el HTML
           document.getElementById("Customer_ID").value = contactId;
           document.getElementById("Customer_Name").value = contactName;
           document.getElementById("headerTitle").textContent = "Crear Cotización - " + contactName;
           document.getElementById("Deal_Name").value = dealData.Deal_Name || '';
+
           if (dealData.Owner && dealData.Owner.name) {
             document.getElementById("Deal_Owner").value = dealData.Owner.name;
           }
+
+          // ➕ Obtener datos del contacto (RUC y Teléfono)
+          ZOHO.CRM.API.getRecord({
+            Entity: "Contacts",
+            RecordID: contactId
+          }).then(function (contactResponse) {
+            const contactData = contactResponse.data[0];
+            console.log("Datos del contacto:", contactData);
+
+            // Aquí se pasa al HTML
+            document.getElementById("contac_ruc").value = contactData.RUC_C_dula || '';
+            document.getElementById("contac_tel").value = contactData.Phone || '';
+            document.getElementById("razonsocial").value = contactData.Nombre_o_raz_n_social || '';
+            document.getElementById("ciudad").value = contactData.Ciudad || '';
+            document.getElementById("codigopostal").value = contactData.Codigo_postal || '';
+            document.getElementById("email").value = contactData.Email || '';
+            document.getElementById("pais").value = contactData.Pa_s || '';
+
+          }).catch(function (error) {
+            console.error("Error al obtener el contacto:", error);
+          });
         }
       }).catch(function (error) {
         console.error("Error al obtener datos del Deal:", error);
         showToast("Error al cargar datos del trato", false);
       });
+
     }
   });
 
 
-  ZOHO.CRM.API.getRecord({
-    Entity: "Contacts",
-
-    RecordID: "contactId"
-  }).then( function( datacontacto ){
-    console.log( datacontacto )
-  })
 
   document.getElementById('discountInput').addEventListener('input', updateGrandTotal);
 
@@ -423,6 +453,41 @@ async function initializeWidget() {
 //   }
 // }
 
+function populateChasisSelect(serialNumbers) {
+  console.log("→ populateChasisSelect llamado con:", serialNumbers);
+
+  const chasisSelect = document.getElementById('chasis');
+
+
+  // 1) Limpiar cualquier opción previa
+  chasisSelect.options.length = 0;
+
+  // 2) Añadir placeholder
+  const placeholder = new Option('Selecciona un chasis', '');
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  chasisSelect.add(placeholder);
+
+  if (Array.isArray(serialNumbers) && serialNumbers.length > 0) {
+    // 3) Añadir cada serial como opción
+    serialNumbers.forEach(serial => {
+      const opt = new Option(serial.serialnumber, serial.serialnumber);
+      opt.setAttribute('data-serial-id', serial.serialnumber_id);
+      chasisSelect.add(opt);
+    });
+    // 4) Si sólo hay uno, lo seleccionamos automáticamente
+    if (serialNumbers.length === 1) {
+      chasisSelect.selectedIndex = 1;
+    }
+  } else {
+    // 5) Si no hay seriales, mostrar mensaje
+    const none = new Option('No hay chasis disponibles', '');
+    none.disabled = true;
+    none.selected = true;
+    chasisSelect.add(none);
+  }
+}
+
 function populateVehiculoDetailsFromFinance(vehiculoData) {
   const customFields = vehiculoData.custom_field_hash || {};
 
@@ -433,26 +498,9 @@ function populateVehiculoDetailsFromFinance(vehiculoData) {
   document.getElementById('color').value = vehiculoData.attribute_option_name1 || '';
   document.getElementById('tipo').value = customFields.cf_categor_a_del_producto || '';
   document.getElementById('motor').value = '';
-document.getElementById('entransito').textContent = customFields.cf_pedido_especial || '';
-
-  const chasisSelect = document.getElementById('chasis');
-  chasisSelect.innerHTML = '<option value="">Selecciona un chasis</option>';
-
-  document.getElementById('chasis').addEventListener('change', function () {
-    console.log("🔧 Chasis seleccionado por el usuario:", this.value);
+  document.getElementById('entransito').textContent = customFields.cf_pedido_especial || '';
 
 
-
-  });
-
-  if (Array.isArray(vehiculoData.serial_numbers)) {
-    vehiculoData.serial_numbers.forEach(serial => {
-      const option = document.createElement('option');
-      option.value = serial;
-      option.textContent = serial;
-      chasisSelect.appendChild(option);
-    });
-  }
 }
 
 
@@ -500,16 +548,49 @@ async function getProductsFromCRM() {
 
 
 
-      productSelect.addEventListener('change', function () {
+      productSelect.addEventListener('change', async function () {
         const selectedOption = this.options[this.selectedIndex];
         const selectedProductId = this.value;
-        const stock = selectedOption.getAttribute('data-stock');
-        const price = selectedOption.getAttribute('data-price');
         const row = this.closest('tr');
-        row.querySelector('.unit-price').value = price;
-
-        console.log("item id del producto seleccionado: ", selectedProductId);
-        console.log("Stock disponible:", stock);
+      
+        // Mostrar precio y stock
+        row.querySelector('.unit-price').value = selectedOption.getAttribute('data-price');
+        row.querySelector('.stock-display').textContent = selectedOption.getAttribute('data-stock');
+      
+        // 1) Invocamos a Inventory
+        const resp = await ZOHO.CRM.CONNECTION.invoke("inventory_link", {
+          url: `https://inventory.zoho.com/api/v1/items/serialnumbers?organization_id=878347402&item_id=${selectedProductId}`,
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          param_type: 2,
+        });
+      
+        // 2) Vemos TODO el objeto para inspeccionar la estructura
+        console.log("→ Inventory full JSON:", JSON.stringify(resp, null, 2));
+      
+        // 3) Helper recursivo para extraer serial_numbers de donde sea que esté
+        function findSerials(obj) {
+          if (!obj || typeof obj !== 'object') return null;
+          if (Array.isArray(obj.serial_numbers)) return obj.serial_numbers;
+          for (const key of Object.keys(obj)) {
+            const found = findSerials(obj[key]);
+            if (found) return found;
+          }
+          return null;
+        }
+      
+        // 4) Usamos el helper (o un array vacío si no lo encuentra)
+        const serialArray = findSerials(resp) || [];
+        console.log("→ serialArray extraída:", serialArray);
+      
+        // 5) Y poblamos tu select
+        populateChasisSelect(serialArray);
+      
+       
+      
+      
+      
+      
 
 
 
@@ -568,7 +649,7 @@ async function sendToWebhook(data) {
 
     // No hacemos .json() para evitar errores si no es un JSON válido
     return;
-    
+
   } catch (error) {
     console.error("Error al enviar datos al webhook:", error);
     // Aún así continuamos con el flujo, no lanzamos el error
@@ -701,7 +782,7 @@ async function createInvoice() {
     const webhookResponse = await sendToWebhook(invoiceData);
     console.log("Respuesta del webhook:", webhookResponse);
     showSuccessToast("¡Cotización creada exitosamente!");
-    
+
     try {
       await ZOHO.CRM.BLUEPRINT.proceed();
       console.log("Transición de blueprint ejecutada correctamente");
@@ -709,7 +790,7 @@ async function createInvoice() {
       console.warn("No se pudo avanzar en el blueprint:", bpError);
       showToast("Cotización creada pero hubo un problema con el proceso interno", false);
     }
-    
+
 
     // Cerrar el widget después de 2 segundos
     setTimeout(() => {

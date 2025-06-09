@@ -1,0 +1,6 @@
+[error] [2025-04-28T14:30:14.391Z] : × Below file formats are not allowed in Sigma
+[info] [2025-04-28T14:30:14.401Z] :  ==> app\log\WidgetPresupuesto.zip
+[info] [2025-04-28T14:30:14.403Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2025-04-28T14:30:14.417Z] : × Below file formats are not allowed in Sigma
+[info] [2025-04-28T14:30:14.418Z] :  ==> app\log\WidgetPresupuesto.zip
+[info] [2025-04-28T14:30:14.420Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

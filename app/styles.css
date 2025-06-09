@@ -11,6 +11,18 @@
     --zoho-info: #17a2b8;
 }
 
+#chasis {
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Que los contenedores padres no oculten el desplegable */
+  .widget-container,
+  .card,
+  .card-body {
+    overflow: visible !important;
+  }
+
 /* Estilos generales */
 body.zoho-theme {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -189,3 +201,6 @@ h1, h2, h3, h4, h5, h6 {
 .rounded-3 {
     border-radius: 8px !important;
 }
+/* ——— Forzar que el dropdown de #chasis no se recorte y flote arriba ——— */
+
+  
